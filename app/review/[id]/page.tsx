@@ -33,6 +33,9 @@ import {
   Info,
   Edit3,
   Eye,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 
@@ -629,6 +632,7 @@ export default function ReviewPage() {
   const [reviewedFlagIds, setReviewedFlagIds] = useState<Set<string>>(
     new Set(),
   );
+  const [isFlagsOpen, setIsFlagsOpen] = useState(false);
 
   const handleToggleFlagReviewed = useCallback(
     (flagId: string) => {
@@ -822,14 +826,14 @@ export default function ReviewPage() {
   return (
     <div className="h-screen flex flex-col bg-stone-50">
       {/* Top bar */}
-      <header className="bg-white border-b border-stone-200 px-6 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-4">
+      <header className="bg-white border-b border-stone-200 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shrink-0">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to queue
+            <span className="hidden sm:inline">Back to queue</span>
           </Link>
           <span className="text-stone-300">|</span>
           <div className="flex items-center gap-2">
@@ -838,16 +842,16 @@ export default function ReviewPage() {
             <span className="text-stone-500">— {doc.clientName}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           {/* Flag summary */}
           {criticalCount > 0 && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 ring-1 ring-red-200 px-2 py-1 rounded-full">
+            <span className="hidden lg:inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 ring-1 ring-red-200 px-2 py-1 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
               {criticalCount} critical
             </span>
           )}
           {warningCount > 0 && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 ring-1 ring-amber-200 px-2 py-1 rounded-full">
+            <span className="hidden lg:inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 ring-1 ring-amber-200 px-2 py-1 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
               {warningCount} warning
             </span>
@@ -871,17 +875,31 @@ export default function ReviewPage() {
         </div>
       </header>
 
+      {/* Mobile: edge handle to toggle AI flags drawer */}
+      <button
+        type="button"
+        onClick={() => setIsFlagsOpen((open) => !open)}
+        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 lg:hidden inline-flex items-center justify-center rounded-l-full bg-amber-50 border border-amber-200 text-amber-700 px-2 py-2 shadow-sm"
+        aria-label={isFlagsOpen ? "Collapse AI review flags" : "Expand AI review flags"}
+      >
+        {isFlagsOpen ? (
+          <ChevronRight className="w-4 h-4" />
+        ) : (
+          <ChevronLeft className="w-4 h-4" />
+        )}
+      </button>
+
       {/* Split pane */}
-      <div className="flex-1 flex min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
         {/* Left: TipTap rich text editor */}
-        <div className="flex-1 flex flex-col min-w-0 border-r border-stone-200 bg-white">
+        <div className="flex-1 flex flex-col min-w-0 border-b lg:border-b-0 lg:border-r border-stone-200 bg-white">
           <EditorToolbar
             editor={editor}
             isEditable={isEditable}
             onToggleEditable={toggleEditable}
           />
           <div className="flex-1 overflow-auto relative">
-            <div className="max-w-2xl mx-auto py-10 px-10">
+            <div className="max-w-2xl mx-auto py-8 sm:py-10 px-4 sm:px-6 lg:px-10">
               {/* Document header */}
               <div className="mb-8 pb-6 border-b border-stone-100">
                 <h1 className="text-2xl font-semibold text-stone-900 mb-1">
@@ -905,17 +923,42 @@ export default function ReviewPage() {
           </div>
         </div>
 
+        {/* Mobile backdrop for flags drawer */}
+        {isFlagsOpen && (
+          <button
+            type="button"
+            className="fixed inset-0 bg-black/30 lg:hidden z-30"
+            onClick={() => setIsFlagsOpen(false)}
+            aria-label="Close AI review flags"
+          />
+        )}
+
         {/* Right: AI flags + actions */}
-        <aside className="w-[380px] shrink-0 flex flex-col bg-stone-50 border-l border-stone-200">
-          <div className="p-4 border-b border-stone-200 bg-white">
-            <h2 className="text-sm font-semibold text-stone-900">
-              AI review flags
-            </h2>
-            <p className="text-xs text-stone-500 mt-0.5">
+        <aside
+          className={`fixed inset-y-0 right-0 z-40 w-full max-w-sm transform transition-transform lg:transform-none lg:static lg:w-[380px] lg:shrink-0 flex flex-col bg-stone-50 border-t lg:border-t-0 lg:border-l border-stone-200 max-h-[75vh] lg:max-h-none ${
+            isFlagsOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
+          }`}
+          aria-hidden={!isFlagsOpen && typeof window !== "undefined" ? undefined : false}
+        >
+          <div className="p-4 border-b border-stone-200 bg-white flex items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-stone-900">
+                AI review flags
+              </h2>
+              <p className="text-xs text-stone-500 mt-0.5">
               {doc.flags.length === 0
                 ? "No issues flagged"
                 : `${allFlags.length} issue${allFlags.length !== 1 ? "s" : ""} — flagged clauses are highlighted in the editor`}
-            </p>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsFlagsOpen(false)}
+              className="inline-flex lg:hidden items-center justify-center w-7 h-7 rounded-full border border-stone-200 text-stone-500 hover:bg-stone-50"
+              aria-label="Close AI review flags"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <div className="flex-1 overflow-auto p-4 space-y-3">

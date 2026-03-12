@@ -87,8 +87,8 @@ export default function QueuePage() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-stone-200 px-8 pt-8 pb-0">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white border-b border-stone-200 px-4 sm:px-8 pt-6 sm:pt-8 pb-0">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
             <h1 className="text-xl font-semibold text-stone-900">
               Review Queue
@@ -131,12 +131,12 @@ export default function QueuePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-0">
+        <div className="flex gap-0 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key)}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+              className={`px-3 sm:px-4 py-2.5 text-sm whitespace-nowrap font-medium border-b-2 transition-colors ${
                 filter === tab.key
                   ? "border-amber-600 text-amber-700"
                   : "border-transparent text-stone-500 hover:text-stone-700"
@@ -166,7 +166,7 @@ export default function QueuePage() {
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-auto px-8 py-6">
+      <div className="flex-1 overflow-auto px-4 sm:px-8 py-4 sm:py-6">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-stone-400">
             <FileText className="w-10 h-10 mb-3 opacity-40" />
@@ -174,7 +174,8 @@ export default function QueuePage() {
           </div>
         ) : (
           <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs sm:text-sm min-w-[640px]">
               <thead>
                 <tr className="border-b border-stone-100">
                   <th className="text-left px-5 py-3 text-xs font-medium text-stone-500 uppercase tracking-wide">
@@ -286,7 +287,7 @@ export default function QueuePage() {
                       <td className="px-5 py-4">
                         {hasHydrated ? (
                           <span
-                            className={`inline-flex min-w-[5.5rem] h-6 items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[doc.status]}`}
+                            className={`inline-flex min-w-[5.5rem] h-6 items-center gap-1.5 whitespace-nowrap text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[doc.status]}`}
                           >
                             {STATUS_ICONS[doc.status]}
                             {STATUS_LABELS[doc.status]}
@@ -340,6 +341,7 @@ export default function QueuePage() {
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>
